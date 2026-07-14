@@ -17,14 +17,19 @@
 
     <!-- Header -->
     <header id="header">
-      <div class="logo">
-        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-          <rect x="1" y="1" width="12" height="12" rx="2" fill="#7c3aed"/>
-          <rect x="15" y="1" width="12" height="12" rx="2" fill="#a78bfa"/>
-          <rect x="1" y="15" width="12" height="12" rx="2" fill="#a78bfa"/>
-          <rect x="15" y="15" width="12" height="12" rx="2" fill="#7c3aed"/>
-        </svg>
-        <span class="logo-text">Cube<span class="accent">Rush</span></span>
+      <div class="logo-area">
+        <div class="logo">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="1" y="1" width="12" height="12" rx="2" fill="#7c3aed"/>
+            <rect x="15" y="1" width="12" height="12" rx="2" fill="#a78bfa"/>
+            <rect x="1" y="15" width="12" height="12" rx="2" fill="#a78bfa"/>
+            <rect x="15" y="15" width="12" height="12" rx="2" fill="#7c3aed"/>
+          </svg>
+          <span class="logo-text">Cube<span class="accent">Rush</span></span>
+        </div>
+        <button id="btn-toggle-moves" class="mobile-toggle-btn" title="Toggle Moves">
+          <span class="toggle-icon">🎛️</span><span class="toggle-lbl">MOVES</span>
+        </button>
       </div>
 
       <div id="timer-wrap">
@@ -33,6 +38,9 @@
       </div>
 
       <div id="header-right">
+        <button id="btn-toggle-stats" class="mobile-toggle-btn" title="Toggle Stats">
+          <span class="toggle-icon">📊</span><span class="toggle-lbl">STATS</span>
+        </button>
         <div id="best-badge">
           <span class="badge-label">🏆 BEST</span>
           <span id="header-best">--:--.-</span>
@@ -43,6 +51,10 @@
 
     <!-- LEFT: Move Controls Panel -->
     <div id="controls-panel" class="glass-panel">
+      <div class="panel-header mobile-only">
+        <div class="panel-title-text">MOVES PANEL</div>
+        <button class="panel-close-btn" id="close-controls">&times;</button>
+      </div>
       <div class="panel-section">
         <div class="section-title">FACE MOVES</div>
         <div class="move-grid">
@@ -121,8 +133,20 @@
 
     <!-- RIGHT: Records Panel -->
     <div id="records-panel" class="glass-panel">
+      <div class="panel-header mobile-only">
+        <div class="panel-title-text">STATS PANEL</div>
+        <button class="panel-close-btn" id="close-records">&times;</button>
+      </div>
       <div class="section-title">🏆 BEST TIME</div>
       <div class="best-time-display" id="best-time-big">--:--.-</div>
+
+      <div class="panel-divider"></div>
+
+      <div class="section-title">📊 AVERAGES</div>
+      <div class="averages-container">
+        <div class="avg-row"><span>Ao5:</span> <strong id="val-ao5">--:--.-</strong></div>
+        <div class="avg-row"><span>Ao12:</span> <strong id="val-ao12">--:--.-</strong></div>
+      </div>
 
       <div class="panel-divider"></div>
 

@@ -234,10 +234,18 @@ class RubiksCube {
   reset() {
     // Kill any running animation queue
     gsap.globalTimeline.clear();
+    gsap.killTweensOf(this.root.rotation);
+    this.root.rotation.set(0, 0, 0);
+
     this.queue     = [];
     this.history   = [];
     this.isAnimating = false;
-    for (const c of this.cubies) this.root.remove(c.grp);
+
+    // Completely clear root of all children (including any temporary pivots)
+    while (this.root.children.length > 0) {
+      this.root.remove(this.root.children[0]);
+    }
+
     this.cubies       = [];
     this.stickerMeshes = [];
     this.meshMap      = new Map();
@@ -284,7 +292,6 @@ function snapCubieRotation(cubieGrp) {
   
   const x = new THREE.Vector3(m.elements[0], m.elements[1], m.elements[2]).normalize();
   const y = new THREE.Vector3(m.elements[4], m.elements[5], m.elements[6]).normalize();
-  const z = new THREE.Vector3(m.elements[8], m.elements[9], m.elements[10]).normalize();
 
   const directions = [
     new THREE.Vector3(1, 0, 0), new THREE.Vector3(-1, 0, 0),
@@ -293,7 +300,7 @@ function snapCubieRotation(cubieGrp) {
   ];
 
   const snapVector = (v) => {
-    let maxDot = -1;
+    let maxDot = -Infinity;
     let bestDir = directions[0];
     for (const d of directions) {
       const dot = v.dot(d);
@@ -308,7 +315,7 @@ function snapCubieRotation(cubieGrp) {
   const newX = snapVector(x);
   
   let newY = null;
-  let maxDotY = -1;
+  let maxDotY = -Infinity;
   for (const d of directions) {
     if (Math.abs(d.dot(newX)) > 0.1) continue;
     const dot = y.dot(d);
@@ -324,7 +331,7 @@ function snapCubieRotation(cubieGrp) {
   m.elements[4] = newY.x; m.elements[5] = newY.y; m.elements[6] = newY.z;
   m.elements[8] = newZ.x; m.elements[9] = newZ.y; m.elements[10] = newZ.z;
 
-  cubieGrp.rotation.setFromRotationMatrix(m);
+  cubieGrp.setRotationFromMatrix(m);
 }
 
 // Maps clicked face local normal + local drag direction → Rubik's layer rotation parameters
@@ -446,6 +453,13 @@ function getHit(clientX, clientY) {
 
 function onPointerDown(clientX, clientY) {
   if (cube.isAnimating) return;
+
+  // Auto-close open panels on mobile when interacting with the cube
+  if (window.innerWidth <= 768) {
+    document.getElementById('controls-panel').classList.remove('open');
+    document.getElementById('records-panel').classList.remove('open');
+  }
+
   const hit = getHit(clientX, clientY);
   if (hit) {
     // Start face drag
@@ -635,10 +649,44 @@ function syncBestUI() {
   document.getElementById('best-time-big').textContent = txt;
 }
 
+function loadSessions() {
+  const s = localStorage.getItem('cuberush-sessions');
+  if (s) {
+    try {
+      sessions = JSON.parse(s);
+    } catch (e) {
+      sessions = [];
+    }
+  }
+}
+
+function saveSessions() {
+  localStorage.setItem('cuberush-sessions', JSON.stringify(sessions));
+}
+
+function calculateAverage(n) {
+  if (sessions.length < n) return null;
+  const lastN = sessions.slice(0, n).map(s => s.ms);
+  lastN.sort((a, b) => a - b);
+  // Remove best and worst
+  const trimmed = lastN.slice(1, -1);
+  const sum = trimmed.reduce((a, b) => a + b, 0);
+  return sum / trimmed.length;
+}
+
+function updateAverages() {
+  const ao5 = calculateAverage(5);
+  const ao12 = calculateAverage(12);
+  document.getElementById('val-ao5').textContent = ao5 !== null ? fmtTime(ao5) : '--:--.-';
+  document.getElementById('val-ao12').textContent = ao12 !== null ? fmtTime(ao12) : '--:--.-';
+}
+
 function addSession(ms, moves) {
   sessions.unshift({ ms, moves });
-  if (sessions.length > 10) sessions.pop();
+  if (sessions.length > 100) sessions.pop();
+  saveSessions();
   renderRecords();
+  updateAverages();
 }
 
 function renderRecords() {
@@ -710,6 +758,7 @@ function doScramble() {
   scrambleComplete = false;
   cube.reset();
   resetTimer();
+  resetIdleTimer();
   moveCount = 0; updateMoveCount();
   gsap.fromTo(document.getElementById('canvas-container'),
     { opacity:.6 }, { opacity:1, duration:.5 });
@@ -720,6 +769,7 @@ function doReset() {
   inSolveMode = false;
   cube.reset();
   resetTimer();
+  resetIdleTimer();
   moveCount = 0; updateMoveCount();
   showToast('Cube reset to solved state');
 }
@@ -774,6 +824,30 @@ document.getElementById('btn-hint').addEventListener('click', () => {
   setTimeout(() => { bar.style.opacity='0'; setTimeout(()=>bar.style.display='none',400); }, 4000);
 });
 
+// Mobile panel toggle wiring
+const controlsPanel = document.getElementById('controls-panel');
+const recordsPanel = document.getElementById('records-panel');
+
+document.getElementById('btn-toggle-moves').addEventListener('click', (e) => {
+  e.stopPropagation();
+  controlsPanel.classList.toggle('open');
+  recordsPanel.classList.remove('open');
+});
+
+document.getElementById('btn-toggle-stats').addEventListener('click', (e) => {
+  e.stopPropagation();
+  recordsPanel.classList.toggle('open');
+  controlsPanel.classList.remove('open');
+});
+
+document.getElementById('close-controls').addEventListener('click', () => {
+  controlsPanel.classList.remove('open');
+});
+
+document.getElementById('close-records').addEventListener('click', () => {
+  recordsPanel.classList.remove('open');
+});
+
 // ── Idle auto-breathe ─────────────────────────────────────
 let idleTimer = null;
 function resetIdleTimer() {
@@ -813,6 +887,8 @@ function animate() {
 
 // ── Init ──────────────────────────────────────────────────
 loadBest();
+loadSessions();
+updateAverages();
 renderRecords();
 animate();
 showToast('👋 Welcome! Press SCRAMBLE to start.', '');
