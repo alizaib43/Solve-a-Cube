@@ -35,6 +35,9 @@ window.addEventListener('resize', () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+  if (typeof orbit !== 'undefined') {
+    adjustCameraForMobile();
+  }
 });
 
 // ── Lighting ──────────────────────────────────────────────
@@ -426,6 +429,12 @@ const orbit = (() => {
   }
   return { state, pan, zoom, applyOrbit };
 })();
+
+function adjustCameraForMobile() {
+  const isMobile = window.innerWidth < 768;
+  orbit.state.radius = isMobile ? 11.8 : Math.sqrt(25+16+49);
+  orbit.applyOrbit();
+}
 
 // ── Drag Controls ─────────────────────────────────────────
 const raycaster = new THREE.Raycaster();
@@ -890,5 +899,6 @@ loadBest();
 loadSessions();
 updateAverages();
 renderRecords();
+adjustCameraForMobile();
 animate();
 showToast('👋 Welcome! Press SCRAMBLE to start.', '');

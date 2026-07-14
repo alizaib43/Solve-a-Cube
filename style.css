@@ -417,7 +417,6 @@ body {
   .logo-text { display:none; }
   .mobile-only { display:flex; }
 
-  #controls-panel,
   #records-panel {
     position:fixed;
     top:calc(var(--header-h) + 10px);
@@ -428,28 +427,79 @@ body {
     opacity:0;
     visibility:hidden;
     box-shadow:0 24px 64px rgba(0,0,0,0.85);
-  }
-
-  #controls-panel {
-    left:10px;
-    transform:translateX(-110%);
-  }
-
-  #records-panel {
     right:10px;
     transform:translateX(110%);
-  }
-
-  #controls-panel.open {
-    transform:translateX(0);
-    opacity:1;
-    visibility:visible;
   }
 
   #records-panel.open {
     transform:translateX(0);
     opacity:1;
     visibility:visible;
+  }
+
+  #controls-panel {
+    position:fixed;
+    left:0; right:0; bottom:0;
+    top:auto;
+    width:100% !important;
+    max-height:230px;
+    z-index:150;
+    border-radius:24px 24px 0 0;
+    border-left:none; border-right:none; border-bottom:none;
+    box-shadow:0 -12px 40px rgba(0,0,0,0.75);
+    padding:16px 20px 24px 20px;
+    transition:transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s;
+    transform:translateY(110%);
+    opacity:0;
+    visibility:hidden;
+  }
+
+  #controls-panel.open {
+    transform:translateY(0);
+    opacity:1;
+    visibility:visible;
+  }
+
+  #controls-panel .move-grid {
+    display:flex;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    gap:10px;
+    padding:4px 0 10px 0;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  #controls-panel .move-grid::-webkit-scrollbar {
+    display:none;
+  }
+
+  #controls-panel .move-group {
+    flex:0 0 auto;
+    flex-direction:row;
+    align-items:center;
+    background:rgba(255,255,255,0.03);
+    border:1px solid var(--border);
+    padding:6px 10px;
+    border-radius:12px;
+    gap:8px;
+  }
+
+  #controls-panel .face-tag {
+    font-size:0.75rem;
+    padding:4px 8px;
+  }
+
+  #controls-panel .move-btn {
+    width:34px;
+    height:34px;
+  }
+
+  #controls-panel .panel-divider {
+    margin:8px 0;
+  }
+
+  #controls-panel .panel-header {
+    margin-bottom:8px;
   }
 
   #timer-value { font-size:1.6rem; }
