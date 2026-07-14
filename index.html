@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CubeRush — 3D Interactive Rubik's Cube Solver</title>
+  <meta name="description" content="Solve the Rubik's Cube in stunning 3D. Drag to rotate faces, use sliders, track your time and records. Fully interactive on mobile and desktop.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- Three.js Canvas -->
+    <div id="canvas-container"></div>
+
+    <!-- Header -->
+    <header id="header">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect x="1" y="1" width="12" height="12" rx="2" fill="#7c3aed"/>
+          <rect x="15" y="1" width="12" height="12" rx="2" fill="#a78bfa"/>
+          <rect x="1" y="15" width="12" height="12" rx="2" fill="#a78bfa"/>
+          <rect x="15" y="15" width="12" height="12" rx="2" fill="#7c3aed"/>
+        </svg>
+        <span class="logo-text">Cube<span class="accent">Rush</span></span>
+      </div>
+
+      <div id="timer-wrap">
+        <div id="timer-value">00:00.00</div>
+        <div class="timer-label">SOLVING TIME</div>
+      </div>
+
+      <div id="header-right">
+        <div id="best-badge">
+          <span class="badge-label">🏆 BEST</span>
+          <span id="header-best">--:--.-</span>
+        </div>
+        <button id="btn-hint" class="icon-btn" title="Controls hint">?</button>
+      </div>
+    </header>
+
+    <!-- LEFT: Move Controls Panel -->
+    <div id="controls-panel" class="glass-panel">
+      <div class="panel-section">
+        <div class="section-title">FACE MOVES</div>
+        <div class="move-grid">
+          <!-- U -->
+          <div class="move-group">
+            <span class="face-tag u-tag">U</span>
+            <button class="move-btn" id="m-u-cw"  data-axis="y" data-layer="1"  data-dir="-1">↻</button>
+            <button class="move-btn" id="m-u-ccw" data-axis="y" data-layer="1"  data-dir="1">↺</button>
+          </div>
+          <!-- D -->
+          <div class="move-group">
+            <span class="face-tag d-tag">D</span>
+            <button class="move-btn" id="m-d-cw"  data-axis="y" data-layer="-1" data-dir="1">↻</button>
+            <button class="move-btn" id="m-d-ccw" data-axis="y" data-layer="-1" data-dir="-1">↺</button>
+          </div>
+          <!-- R -->
+          <div class="move-group">
+            <span class="face-tag r-tag">R</span>
+            <button class="move-btn" id="m-r-cw"  data-axis="x" data-layer="1"  data-dir="1">↻</button>
+            <button class="move-btn" id="m-r-ccw" data-axis="x" data-layer="1"  data-dir="-1">↺</button>
+          </div>
+          <!-- L -->
+          <div class="move-group">
+            <span class="face-tag l-tag">L</span>
+            <button class="move-btn" id="m-l-cw"  data-axis="x" data-layer="-1" data-dir="-1">↻</button>
+            <button class="move-btn" id="m-l-ccw" data-axis="x" data-layer="-1" data-dir="1">↺</button>
+          </div>
+          <!-- F -->
+          <div class="move-group">
+            <span class="face-tag f-tag">F</span>
+            <button class="move-btn" id="m-f-cw"  data-axis="z" data-layer="1"  data-dir="-1">↻</button>
+            <button class="move-btn" id="m-f-ccw" data-axis="z" data-layer="1"  data-dir="1">↺</button>
+          </div>
+          <!-- B -->
+          <div class="move-group">
+            <span class="face-tag b-tag">B</span>
+            <button class="move-btn" id="m-b-cw"  data-axis="z" data-layer="-1" data-dir="1">↻</button>
+            <button class="move-btn" id="m-b-ccw" data-axis="z" data-layer="-1" data-dir="-1">↺</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <div class="panel-section">
+        <div class="section-title">SLICE MOVES</div>
+        <div class="move-grid slice-grid">
+          <!-- M -->
+          <div class="move-group">
+            <span class="face-tag m-tag">M</span>
+            <button class="move-btn" id="m-m-cw"  data-axis="x" data-layer="0" data-dir="-1">↻</button>
+            <button class="move-btn" id="m-m-ccw" data-axis="x" data-layer="0" data-dir="1">↺</button>
+          </div>
+          <!-- E -->
+          <div class="move-group">
+            <span class="face-tag e-tag">E</span>
+            <button class="move-btn" id="m-e-cw"  data-axis="y" data-layer="0" data-dir="1">↻</button>
+            <button class="move-btn" id="m-e-ccw" data-axis="y" data-layer="0" data-dir="-1">↺</button>
+          </div>
+          <!-- S -->
+          <div class="move-group">
+            <span class="face-tag s-tag">S</span>
+            <button class="move-btn" id="m-s-cw"  data-axis="z" data-layer="0" data-dir="-1">↻</button>
+            <button class="move-btn" id="m-s-ccw" data-axis="z" data-layer="0" data-dir="1">↺</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <div class="panel-section">
+        <div class="section-title">MOVE COUNT</div>
+        <div id="move-counter">0</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Records Panel -->
+    <div id="records-panel" class="glass-panel">
+      <div class="section-title">🏆 BEST TIME</div>
+      <div class="best-time-display" id="best-time-big">--:--.-</div>
+
+      <div class="panel-divider"></div>
+
+      <div class="section-title">📋 SESSION</div>
+      <div id="records-list">
+        <div class="no-records">No solves yet.<br>Scramble &amp; solve!</div>
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <div class="section-title">ℹ️ CONTROLS</div>
+      <div class="controls-help">
+        <div class="help-row"><span class="key">Drag</span> Rotate face</div>
+        <div class="help-row"><span class="key">Drag empty</span> Orbit</div>
+        <div class="help-row"><span class="key">Scroll</span> Zoom</div>
+        <div class="help-row"><span class="key">Pinch</span> Zoom (mobile)</div>
+      </div>
+    </div>
+
+    <!-- Bottom Actions -->
+    <div id="bottom-bar">
+      <button id="btn-undo"     class="action-btn">
+        <span class="a-icon">↩</span><span class="a-lbl">UNDO</span>
+      </button>
+      <button id="btn-scramble" class="action-btn primary-btn">
+        <span class="a-icon">⚡</span><span class="a-lbl">SCRAMBLE</span>
+      </button>
+      <button id="btn-reset"    class="action-btn">
+        <span class="a-icon">↺</span><span class="a-lbl">RESET</span>
+      </button>
+    </div>
+
+    <!-- Solve Celebration Modal -->
+    <div id="solve-modal" class="modal-overlay hidden">
+      <div class="modal-box glass-panel">
+        <div class="confetti-row">🎉 🎊 🎉</div>
+        <h1 class="modal-title">SOLVED!</h1>
+        <div class="modal-time" id="modal-time-val">00:00.00</div>
+        <div class="modal-sub"  id="modal-sub-text">–</div>
+        <div class="modal-moves" id="modal-moves-text">–</div>
+        <button class="action-btn primary-btn" id="modal-play-again">
+          <span class="a-icon">⚡</span><span class="a-lbl">PLAY AGAIN</span>
+        </button>
+        <button class="action-btn" id="modal-close">
+          <span class="a-lbl">CLOSE</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="toast-area"></div>
+
+    <!-- Hint overlay -->
+    <div id="hint-bar">
+      <span>👆 Drag faces to rotate • Drag empty space to orbit • Use buttons below</span>
+      <button id="close-hint">✕</button>
+    </div>
+
+  </div><!-- #app -->
+
+  <!-- CDN Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.4/dist/gsap.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
